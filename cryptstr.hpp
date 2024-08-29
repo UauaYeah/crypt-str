@@ -16,7 +16,11 @@ namespace cryptstr {
         static constexpr int randTime = hours * 3600 + minutes * 60 + seconds;
     public:
 
-        static constexpr int rkey = randTime;
+        static constexpr unsigned long long multiplier = 964136223846793005ULL;
+        static constexpr unsigned long long increment = 1ULL;
+        static constexpr int randomized = ((1234567890ULL * multiplier + randTime + increment) % (1ULL << 63)) % 999999999999999999;
+
+        static constexpr int rkey = randomized % randTime;
         static constexpr size_t max_len = 256;
 
         template <size_t N>
@@ -30,6 +34,7 @@ namespace cryptstr {
 
         template <size_t N>
         static std::string xordecrypt(const std::array<char, N>& enc) noexcept {
+            std::cout << rkey << std::endl;
             std::string r;
             for (size_t i = 0; i < N && enc[i] != '\0'; ++i) {
                 r.push_back(enc[i] ^ rkey);
