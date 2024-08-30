@@ -16,11 +16,11 @@ namespace cryptstr {
         static constexpr int randTime = hours * minutes * seconds;
     public:
 
-        static constexpr unsigned long long multiplier = 964136223846793005ULL;
-        static constexpr unsigned long long increment = 1ULL;
-        static constexpr int randomized = ((123456789ULL * multiplier + randTime + increment) % (1ULL << 63)) % 999999999999999999;
+        static constexpr uint32_t a = 16264525;
+        static constexpr uint32_t c = 8013904223;
+        static constexpr uint32_t m = 0xFFFFFFFF;
 
-        static constexpr int rkey = (randomized % randTime) * randTime;
+        static constexpr int rkey = (((a * randTime + c) % m) % randTime) * randTime;
         static constexpr size_t max_len = 256;
 
         template <size_t N>
