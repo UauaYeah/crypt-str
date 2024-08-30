@@ -16,9 +16,9 @@ namespace cryptstr {
         static constexpr int randTime = hours * minutes * seconds;
     public:
 
-        static constexpr uint32_t a = 16264525;
-        static constexpr uint32_t c = 8013904223;
-        static constexpr uint32_t m = 0xFFFFFFFF;
+        static constexpr unsigned long long a = 16264525ULL;
+        static constexpr unsigned long long c = 8013904223ULL;
+        static constexpr unsigned long long m = 0xFFFFFFFF;
 
         static constexpr int rkey = (((a * randTime + c) % m) % randTime) * randTime;
         static constexpr size_t max_len = 256;
@@ -31,16 +31,20 @@ namespace cryptstr {
             }
             return result;
         }
-
         template <size_t N>
-        static std::string xordecrypt(const std::array<char, N>& enc) noexcept {
-            std::string r;
+        static std::array<char, N - 1> xordecrypt(const std::array<char, N>& enc) noexcept {
+            std::array<char, N - 1> r = std::array<char, N - 1>();
             for (size_t i = 0; i < N && enc[i] != '\0'; ++i) {
-                r.push_back(enc[i] ^ rkey);
+                r[i] = enc[i] ^ rkey;
             }
             return r;
         }
 
+        template <size_t N>
+        static const char* decryptToCString(const std::array<char, N>& enc) noexcept {
+            static std::array<char, N - 1> decrypted = xordecrypt(enc);
+            return decrypted.data();
+        }
     public:
         template <size_t N>
         static std::string get(const char(&str)[N]) noexcept {
@@ -52,5 +56,5 @@ namespace cryptstr {
 
 #define crypt(str) []() noexcept { \
     constexpr auto encrypted = ::cryptstr::crypt::xorencrypt(str); \
-    return ::cryptstr::crypt::xordecrypt(encrypted); \
+    return ::cryptstr::crypt::decryptToCString(encrypted); \
 }()
